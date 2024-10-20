@@ -15,8 +15,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "replies.db";
     private static final String TABLE_NAME = "replies";
     private static final String COL_ID = "id";
-    private static final String COL_TIME_TAKEN = "time_taken";
+    private static final String COL_TIME_TAKEN = "time_taken"; // Store as a decimal or integer
     private static final String COL_INCENTIVE = "incentive";
+
     private static final String COL_TECH_STACK = "tech_stack";
 
     public DatabaseHelper(Context context) {
@@ -27,8 +28,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String createTable = "CREATE TABLE " + TABLE_NAME + " (" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COL_TIME_TAKEN + " TEXT, " +
-                COL_INCENTIVE + " TEXT, " +
+                 COL_TIME_TAKEN + " REAL, " +
+                 COL_INCENTIVE + " REAL, "+
                 COL_TECH_STACK + " TEXT)";
         db.execSQL(createTable);
     }
@@ -42,6 +43,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void addReply(String timeTaken, String incentive, String techStack) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
+
+        // Convert time taken to a numeric value (for example, from "2 hours" to 2.0)
+        float numericTimeTaken = convertTimeToDecimal(timeTaken); // Implement this method as needed
+        float numericIncentive = Float.parseFloat(incentive.replace("$", "").replace(",", "").trim());
+
         contentValues.put(COL_TIME_TAKEN, timeTaken);
         contentValues.put(COL_INCENTIVE, incentive);
         contentValues.put(COL_TECH_STACK, techStack);
@@ -49,10 +55,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    // Example conversion method
+    private float convertTimeToDecimal(String timeTaken) {
+        // Assuming time format is "X hours Y minutes"
+        String[] parts = timeTaken.split(" ");
+        float totalHours = 0;
+
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].toLowerCase().contains("hour")) {
+                totalHours += Float.parseFloat(parts[i - 1]);
+            } else if (parts[i].toLowerCase().contains("minute")) {
+                totalHours += Float.parseFloat(parts[i - 1]) / 60;
+            }
+        }
+        return totalHours;
+    }
+
     public ArrayList<String> getAllReplies() {
         ArrayList<String> replies = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME, null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " ORDER BY " + COL_TIME_TAKEN + " ASC, " + COL_INCENTIVE + " ASC", null);
         if (cursor.moveToFirst()) {
             do {
                 String reply = "Time Taken: " + cursor.getString(1) +
@@ -65,32 +87,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return replies;
     }
-    public void addDummyData() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
 
-        // Add first dummy reply
-        contentValues.put(COL_TIME_TAKEN, "2 hours");
-        contentValues.put(COL_INCENTIVE, "$100");
-        contentValues.put(COL_TECH_STACK, "Java");
-        db.insert(TABLE_NAME, null, contentValues);
-
-        // Add second dummy reply
-        contentValues.clear(); // Clear previous values
-        contentValues.put(COL_TIME_TAKEN, "3 hours");
-        contentValues.put(COL_INCENTIVE, "$150");
-        contentValues.put(COL_TECH_STACK, "Kotlin");
-        db.insert(TABLE_NAME, null, contentValues);
-
-        // Add third dummy reply
-        contentValues.clear(); // Clear previous values
-        contentValues.put(COL_TIME_TAKEN, "1.5 hours");
-        contentValues.put(COL_INCENTIVE, "$80");
-        contentValues.put(COL_TECH_STACK, "Python");
-        db.insert(TABLE_NAME, null, contentValues);
-
-        db.close();
-    }
 
 
 }

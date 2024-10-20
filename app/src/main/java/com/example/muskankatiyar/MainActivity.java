@@ -61,18 +61,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Create DatabaseHelper instance
         DatabaseHelper dbHelper = new DatabaseHelper(this);
-        // Add dummy data
-        dbHelper.addDummyData();
 
-        Button addDummyDataButton = findViewById(R.id.add_dummy_data_button);
-        addDummyDataButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DatabaseHelper dbHelper = new DatabaseHelper(MainActivity.this);
-                dbHelper.addDummyData();
-                Toast.makeText(MainActivity.this, "Dummy data added!", Toast.LENGTH_SHORT).show();
-            }
-        });
+
 
 
 

@@ -18,6 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter request"
+            android:textSize="20sp"
             android:inputType="text" />
 
         <!-- Deadline Field -->
@@ -26,6 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter deadline"
+            android:textSize="20sp"
             android:inputType="text" />
 
         <!-- Incentive Field -->
@@ -34,6 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter incentive"
+            android:textSize="20sp"
             android:inputType="text" />
 
         <!-- Container for multiple contact input fields -->
@@ -67,12 +70,7 @@
         android:text="View Replies"
         android:layout_marginTop="20dp" />
 
-    <Button
-        android:id="@+id/add_dummy_data_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add Dummy Data"
-        android:layout_marginTop="20dp" />
+
 
 </LinearLayout>
 
