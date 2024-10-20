@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity"
+        android:padding="16dp">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <!-- Request Field -->
+        <EditText
+            android:id="@+id/request_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter request"
+            android:inputType="text" />
+
+        <!-- Deadline Field -->
+        <EditText
+            android:id="@+id/deadline_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter deadline"
+            android:inputType="text" />
+
+        <!-- Incentive Field -->
+        <EditText
+            android:id="@+id/incentive_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter incentive"
+            android:inputType="text" />
+
+        <!-- Container for multiple contact input fields -->
+        <LinearLayout
+            android:id="@+id/contacts_container"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </LinearLayout>
+
+        <!-- Button to add more contact number fields -->
+        <Button
+            android:id="@+id/add_contact_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Contact Number" />
+
+        <!-- Submit button -->
+        <Button
+            android:id="@+id/submit_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Broadcast Message"
+            android:layout_marginTop="20dp" />
+    </LinearLayout>
+
+
+</LinearLayout>
+
