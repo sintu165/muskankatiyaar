@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -16,9 +17,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_NAME = "replies";
     private static final String COL_ID = "id";
     private static final String COL_TIME_TAKEN = "time_taken"; // Store as a decimal or integer
-    private static final String COL_INCENTIVE = "incentive";
-
+    private static final String COL_INCENTIVE = "incentive";   // Store as an integer or decimal
     private static final String COL_TECH_STACK = "tech_stack";
+    // Define a new column for the contact number
+    private static final String COL_CONTACT_NUMBER = "contact_number";
+    private Context context;
+
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -26,11 +30,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String createTable = "CREATE TABLE " + TABLE_NAME + " (" +
-                COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                 COL_TIME_TAKEN + " REAL, " +
-                 COL_INCENTIVE + " REAL, "+
-                COL_TECH_STACK + " TEXT)";
+        String createTable = "CREATE TABLE " + TABLE_NAME + " ("
+                + COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + COL_CONTACT_NUMBER + " TEXT, "  // Add contact number here
+                + COL_TIME_TAKEN + " REAL, "
+                + COL_INCENTIVE + " REAL, "
+                + COL_TECH_STACK + " TEXT ) "; // Add contact number as a text field;
         db.execSQL(createTable);
     }
 
@@ -40,7 +45,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void addReply(String timeTaken, String incentive, String techStack) {
+    public void addReply(String timeTaken, String incentive, String techStack,String contactNumber) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
 
@@ -48,9 +53,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         float numericTimeTaken = convertTimeToDecimal(timeTaken); // Implement this method as needed
         float numericIncentive = Float.parseFloat(incentive.replace("$", "").replace(",", "").trim());
 
-        contentValues.put(COL_TIME_TAKEN, timeTaken);
-        contentValues.put(COL_INCENTIVE, incentive);
+        // Insert the contact number and reply details
+        contentValues.put(COL_CONTACT_NUMBER, contactNumber); // Store contact number
+        contentValues.put(COL_TIME_TAKEN, numericTimeTaken);
+        contentValues.put(COL_INCENTIVE, numericIncentive);
         contentValues.put(COL_TECH_STACK, techStack);
+
+
         db.insert(TABLE_NAME, null, contentValues);
         db.close();
     }
@@ -74,19 +83,103 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList<String> getAllReplies() {
         ArrayList<String> replies = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " ORDER BY " + COL_TIME_TAKEN + " ASC, " + COL_INCENTIVE + " ASC", null);
-        if (cursor.moveToFirst()) {
-            do {
-                String reply = "Time Taken: " + cursor.getString(1) +
-                        ", Incentive: " + cursor.getString(2) +
-                        ", Tech Stack: " + cursor.getString(3);
-                replies.add(reply);
-            } while (cursor.moveToNext());
+        Cursor cursor = null;
+
+        try {
+            // Query to select all replies sorted by time taken and incentive
+            cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " ORDER BY " + COL_TIME_TAKEN + " ASC, " + COL_INCENTIVE + " ASC", null);
+
+            if (cursor.moveToFirst()) {
+                do {
+                    // Extract all columns, including the contact number
+                    String contactNumber = cursor.getString(cursor.getColumnIndex(COL_CONTACT_NUMBER));
+                    String timeTaken = cursor.getString(cursor.getColumnIndex(COL_TIME_TAKEN));
+                    String incentive = cursor.getString(cursor.getColumnIndex(COL_INCENTIVE));
+                    String techStack = cursor.getString(cursor.getColumnIndex(COL_TECH_STACK));
+
+                    // Format the string to include the contact number
+                    String reply = "Contact: " + contactNumber +
+                            ", Time Taken: " + timeTaken +
+                            ", Incentive: " + incentive +
+                            ", Tech Stack: " + techStack;
+
+                    // Add to the list of replies
+                    replies.add(reply);
+
+                    // Log the data for debugging
+                    Log.d("Database", reply);
+
+                } while (cursor.moveToNext());
+            } else {
+                // If no data is found, show a Toast
+                Log.d("Database", "No replies found in the database");
+
+
+                Toast.makeText(this.context, "No replies in the database", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            // Handle errors and show a Toast with the error message
+            Log.e("DatabaseError", e.getMessage());
+            Toast.makeText(this.context, "Error retrieving replies: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        } finally {
+            if (cursor != null) {
+                cursor.close();  // Ensure the cursor is closed to avoid memory leaks
+            }
+            db.close();  // Close the database connection
         }
-        cursor.close();
-        db.close();
+
         return replies;
     }
+
+
+
+
+    public String[] getBestContactAndTechStack() {
+        String[] result = new String[2];  // Array to hold the best contact number and tech stack
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+
+        try {
+            // Query to get the contact with the least time and incentive
+            cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " ORDER BY " + COL_TIME_TAKEN + " ASC, " + COL_INCENTIVE + " ASC LIMIT 1", null);
+
+            if (cursor.moveToFirst()) {
+                // Extract contact number and tech stack of the best contact
+                String contactNumber = cursor.getString(cursor.getColumnIndex(COL_CONTACT_NUMBER));
+                String techStack = cursor.getString(cursor.getColumnIndex(COL_TECH_STACK));
+
+                result[0] = contactNumber;  // Store the contact number
+                result[1] = techStack;      // Store the tech stack
+            } else {
+                // If no data found, return empty strings
+                result[0] = "";
+                result[1] = "";
+                Toast.makeText(this.context, "No replies found in the database", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e("DatabaseError", e.getMessage());
+            Toast.makeText(this.context, "Error retrieving best contact: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+
+        return result;  // Return the array with contact number and tech stack
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -63,12 +63,19 @@
             android:layout_marginTop="20dp" />
 
     <!-- New button to view replies -->
-    <Button
-        android:id="@+id/view_replies_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="View Replies"
-        android:layout_marginTop="20dp" />
+        <Button
+            android:id="@+id/view_replies_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View Replies"
+            android:layout_marginTop="20dp" />
+
+        <Button
+            android:id="@+id/send_sms_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send SMS to Best Contact" />
+
 
 
 

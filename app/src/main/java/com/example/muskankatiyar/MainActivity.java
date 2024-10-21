@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
     private Button addContactButton, submitButton;
     private ArrayList<EditText> contactFields;
     private EditText requestField, deadlineField, incentiveField;
+
+
 
     private static final int PERMISSION_REQUEST_RECEIVE_SMS = 123;
 
@@ -46,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
         contactsContainer = findViewById(R.id.contacts_container);
         addContactButton = findViewById(R.id.add_contact_button);
         submitButton = findViewById(R.id.submit_button);
+        Button sendSmsButton = findViewById(R.id.send_sms_button);
+
+
         contactFields = new ArrayList<>();
 
 
@@ -65,10 +71,21 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+        sendSmsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processAndSendMessage();
+            }
+        });
+
 
 
         // Add the first contact field initially
         addContactField();
+        
+        
+        
+        
 
         // Add a new contact field when the button is clicked
         addContactButton.setOnClickListener(new View.OnClickListener() {
@@ -77,6 +94,10 @@ public class MainActivity extends AppCompatActivity {
                 addContactField();
             }
         });
+        
+        
+        
+        
 
         // Handle form submission and broadcast message
         submitButton.setOnClickListener(new View.OnClickListener() {
@@ -87,14 +108,14 @@ public class MainActivity extends AppCompatActivity {
                     ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_SEND_SMS);
                 } else {
                     broadcastMessage();
-                    // Start the RepliesActivity after sending messages
-                    Intent intent = new Intent(MainActivity.this, RepliesActivity.class);
-                    startActivity(intent);
+
                 }
             }
         });
 
 
+        
+        
 
 
         // Handle viewing replies
@@ -109,6 +130,29 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void processAndSendMessage() {
+        DatabaseHelper db = new DatabaseHelper(this);
+        // Call the helper method to get the best contact and tech stack
+        String[] bestContactDetails = db.getBestContactAndTechStack();
+
+        String bestContactNumber = bestContactDetails[0];  // Best contact number
+        String bestTechStack = bestContactDetails[1];      // Best tech stack
+
+        // Get the best reply contact
+       // String bestContact = "9536625022";
+
+        // Define your request, deadline, incentive, and tech stack
+        String request = requestField.getText().toString().trim();
+        String deadline = deadlineField.getText().toString().trim();
+        String incentive = incentiveField.getText().toString().trim();
+       // String techStack = "Java, Android";
+
+
+        // Send SMS to the best contact
+        sendSMS(bestContactNumber, request, deadline, incentive, bestTechStack );
+    }
+
+
     // Method to dynamically add a new contact number input field
     private void addContactField() {
         EditText contactField = new EditText(this);
@@ -117,6 +161,13 @@ public class MainActivity extends AppCompatActivity {
         contactsContainer.addView(contactField);
         contactFields.add(contactField);
     }
+    
+    
+    
+    
+    
+    
+    
 
     // Method to send SMS to all entered contacts
     private void broadcastMessage() {
@@ -151,6 +202,37 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Message sent to all contacts!", Toast.LENGTH_LONG).show();
         }
     }
+
+
+
+
+    //message send to best contact number
+    public void sendSMS(String contactNumber, String request, String deadline, String incentive, String techStack) {
+        if (contactNumber == null || contactNumber.isEmpty()) {
+            Toast.makeText(this, "No contact to send message", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String message = "Congratulations! You've been selected for the request: " +
+                request + ". Deadline: " + deadline + ", Incentive: " + incentive +
+                ", Tech Stack: " + techStack;
+
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(contactNumber, null, message, null, null);
+            Toast.makeText(this, "Message sent to: " + contactNumber, Toast.LENGTH_SHORT).show();
+            Log.d("SMS", "Message sent to: " + contactNumber);
+        } catch (Exception e) {
+            Toast.makeText(this, "Failed to send SMS: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Log.e("SMS", "Error sending SMS: " + e.getMessage());
+        }
+    }
+
+
+
+
+
+
 
     // Handle the result of the SMS permission request
     @Override

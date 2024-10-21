@@ -41,8 +41,8 @@ public class SmsReceiver extends BroadcastReceiver {
 
                             // Store the reply in SQLite
                             DatabaseHelper db = new DatabaseHelper(context);
-                            db.addReply(timeTaken, incentive, techStack);
-                            Toast.makeText(context, "Reply saved: " + messageBody, Toast.LENGTH_SHORT).show();
+                            db.addReply(timeTaken, incentive, techStack,sender);
+                            Toast.makeText(context, sender+"Reply saved: " + messageBody, Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(context, "Invalid reply format", Toast.LENGTH_SHORT).show();
                             Log.d("SmsReceiver", "Invalid reply format: " + messageBody);
